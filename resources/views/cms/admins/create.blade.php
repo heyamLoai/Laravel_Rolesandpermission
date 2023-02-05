@@ -31,6 +31,14 @@
               
                 @csrf
                 <div class="form-group">
+                  <label>Role</label>
+                  <select class="form-control"  id="role_id">
+                    @foreach ($roles as $role)
+                    <option value="{{$role->id}}">{{$role->name}}</option>
+                    @endforeach
+                  </select>  
+                </div>
+                <div class="form-group">
                   <label>Cities</label>
                   <select class="form-control"  id="city_id">
                     @foreach ($cities as $city)
@@ -38,22 +46,22 @@
                     @endforeach
                   </select>
                 </div>
+                
                 <div class="form-group">
                   <label for="name_en">Name</label>
-                  <input type="text" class="form-control" id="name"   placeholder="Enter Name">
+                  <input type="text" class="form-control" id="name" placeholder="Enter Name">
                 </div>
                 <div class="form-group">
-                  <label for="name_ar">Email</label>
+                  <label for="email">Email</label>
                   <input type="email" class="form-control" id="email"  placeholder="Enter Email">
                 </div>
                 
                 <div class="form-group">
                     <div class="custom-control custom-switch">
                       <input type="checkbox" class="custom-control-input" id="active" name="active">
-                      <label class="custom-control-label" for="customSwitch1">Active</label>
+                      <label class="custom-control-label" for="active">Active</label>
                     </div>
                   </div>
-             
             
               </div>
               <!-- /.card-body -->
@@ -83,10 +91,11 @@ function performSave(){
   // Make a request for a user with a given ID
   axios.post('/cms/admin/admins',{
   // to send data 
-      city_id: document.getElementById('city_id').value,
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      active: document.getElementById('active').checked,
+        role_id:document.getElementById('role_id').value,
+        city_id:document.getElementById('city_id').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        active: document.getElementById('active').checked,
 
 
   })
@@ -100,7 +109,7 @@ function performSave(){
     .catch(function (error) {
       // handle error 
       console.log(error);
-      toastr.error(error.data.response.message);
+      toastr.error(error.response.data.message);
     })
     .then(function () {
       // always executed

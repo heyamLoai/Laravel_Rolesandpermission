@@ -27,6 +27,7 @@
                       <th>Name </th>
                       <th>Email</th>
                       <th>Gender</th>
+                      <th>Role</th>
                       <th>Active </th>
                       <th style="width: 40px">Settings</th>
                     </tr>
@@ -38,6 +39,8 @@
                       <td>{{$admin->name}}</td>
                       <td>{{$admin->email}}</td>
                       <td>{{$admin->gender_key}}</td>
+                      <td>{{$admin->roles[0]->name?? ''}}</td>
+
                       
                       {{-- <td><span class="badge @if($admin->active) bg-success @else bg-danger @endif">@if($admin->active) Active @else IN-Active @endif</span></td> --}}
                       <td>
@@ -126,7 +129,7 @@
       // handle error 
       console.log(error);
       // toastr.error(error.data.response.message);
-      showSwalMessage(error.response.data)
+      showSwalMessage(error.response.data.message)
     })
     .then(function () {
       // always executed

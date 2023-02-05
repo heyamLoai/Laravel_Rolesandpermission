@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminWelcomeEmail;
 use App\Models\Admin;
 use App\Models\City;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\CssSelector\Parser\Reader;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
+use Str;
 
 class AdminController extends Controller
 {
@@ -22,7 +26,8 @@ class AdminController extends Controller
     public function index()
     {
         //SELECT * FROM admins
-        $admins = Admin::all();
+
+        $admins = Admin::with('roles')->get();
         return response()->view('cms.admins.index',['admins' => $admins]);
     }
 
@@ -34,8 +39,9 @@ class AdminController extends Controller
     public function create()
     {
         //
+        $roles = Role::where('guard_name', '=', 'admin')->get();
         $cities = City::where('active','=',true)->get();
-        return response()->view('cms.admins.create',['cities' => $cities]);
+        return response()->view('cms.admins.create',['cities' => $cities , 'roles' => $roles]);
 
     }
 
@@ -49,6 +55,7 @@ class AdminController extends Controller
     {
          //dd($request->all());
         $validator = Validator($request -> all(),[
+            'role_id' =>'required|numeric|exists:roles,id',
             'city_id' =>'required|numeric|exists:cities,id',
             'name' => 'required|string|min:3',
             'email' => 'required|string|unique:admins,email',
@@ -60,10 +67,16 @@ class AdminController extends Controller
             $admin = new Admin();
             $admin->name = $request->input('name');
             $admin->email = $request->input('email');
-            $admin->password = Hash::make(12345);
+            // $admin->password = Hash::make(12345);
+            $password =Str::random(10);
+            $admin->password = Hash::make($password);
             $admin->city_id = $request->input('city_id');
             $admin->active = $request->input('active');
             $isSaved = $admin->save();
+            if($isSaved){
+                $admin->assignRole($request->input('role_id'));
+                Mail::send()->send(new AdminWelcomeEmail($admin, $password));
+            }
             return response()->json([
                 'message'=> $isSaved ? 'Saved Successfuly ' : ' Saved Failed '
             ], $isSaved ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST);
@@ -96,9 +109,11 @@ class AdminController extends Controller
      */
     public function edit(Admin $admin)
     {
-        //
+        // 
         $cities = City::Where('active','=',true)->get();
-        return response()->view('cms.admins.edit',['admin'=>$admin,'cities'=>$cities]);
+        $roles = Role::where('guard_name', '=' , 'admin')->get();
+        $currentRole = $admin->roles[0];
+        return response()->view('cms.admins.edit',['admin'=> $admin,'cities' => $cities, 'roles'=> $roles , '$currentRole'=> $currentRole]);
     }
 
     /**
@@ -112,10 +127,11 @@ class AdminController extends Controller
     {
         //
         $validator = Validator($request->all(),[
-            'city_id'=> 'required|numeric|exists:cities,id',
-            'name'=> 'required|string|min:3',
-            'email'=> 'required|email|unique:admins,email,'.$admin->id,
-            'active'=> 'required|boolean',
+            'role_id' => 'required|numeric|exists:roles,id',
+            'city_id' => 'required|numeric|exists:cities,id',
+            'name' => 'required|string|min:3',
+            'email' => 'required|email|unique:admins,email,'.$admin->id,
+            'active' => 'required|boolean',
 
         ]);
 
@@ -125,6 +141,10 @@ class AdminController extends Controller
             $admin->active = $request->input('active');
             $admin->city_id = $request->input('city_id');
             $isSaved = $admin->save();
+
+            if($isSaved){
+                $admin->syncRoles(Role::findById($request->input('role_id'), 'admin'));
+            }
             return response()->json([
                 'message'=> $isSaved ? 'Saved Successfuly ' : ' Saved Failed '],
                   $isSaved ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST);

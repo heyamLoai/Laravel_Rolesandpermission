@@ -30,29 +30,38 @@
               
                 @csrf
                 <div class="form-group">
+                  <label>Role</label>
+                  <select class="form-control"  id="role_id">
+                    @foreach ($roles as $role)
+                    <option value="{{$role->id}}">{{$role->name}}</option>
+                    @endforeach
+                  </select>  
+                </div>
+                <div class="form-group">
                   <label>Cities</label>
-                  <select class="form-control"  id="city-id">
+                  <select class="form-control"  id="city_id">
                     @foreach ($cities as $city)
-                    <option value="{{$city->id}}">{{$city->name_en}}</option>
+                    <option value="{{$city->id}}"  @selected($currentRole->id == $role->id)>{{$city->name_en}}</option>
                     @endforeach
                   </select>
                 </div>
+                
                 <div class="form-group">
                   <label for="name_en">Name</label>
                   <input type="text" class="form-control" id="name" placeholder="Enter Name"
                    value="{{$admin->name}}">
                 </div>
                 <div class="form-group">
-                  <label for="name_ar">Email</label>
+                  <label for="email">Email</label>
                   <input type="email" class="form-control" id="email"  placeholder="Enter Email"
                   value="{{$admin->email}}">
                 </div>
                 
                 <div class="form-group">
                     <div class="custom-control custom-switch">
-                      <input type="checkbox" class="custom-control-input" id="customSwitch1" name="active"
+                      <input type="checkbox" class="custom-control-input" id="active" name="active"
                       @if ($admin->active) checked @endif >
-                      <label class="custom-control-label" for="customSwitch1">Active</label>
+                      <label class="custom-control-label" for="active">Active</label>
                     </div>
                   </div>
              
@@ -117,7 +126,8 @@
     // Make a request for a user with a given ID
     axios.put('/cms/admin/admins/{{$admin->id}}',{
     // to send data 
-        cityid: document.docgetElementById('city-id').value,
+        role_id:document.docgetElementById('role_id').value,
+        city_id: document.docgetElementById('city_id').value,
         name: document.getElementById('name').value,
         email: document.getElementById('email').value,
         active: document.getElementById('active').chacked,
@@ -135,7 +145,7 @@
       .catch(function (error) {
         // handle error 
         console.log(error);
-        toastr.error(error.data.response.message);
+        toastr.error(error.response.data.message);
       })
       .then(function () {
         // always executed

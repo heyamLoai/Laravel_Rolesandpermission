@@ -9,18 +9,24 @@ use Illuminate\Support\Facades\DB;
 
 class CityController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->authorizeResource(City::class,'city');
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+    
     public function index()
     { 
         //$cities= DB::select('SELECT * FROM cities');
         //$cities= DB::table('cities')->get();
+        $this->authorize('ViewAny', City::class);    
           $cities= City::all();
-
-        //
         return response()->view('cms.cities.index',['cities' => $cities]);
     }
 
@@ -32,6 +38,7 @@ class CityController extends Controller
     public function create()
     {
         //
+        $this->authorize('create', City::class);    
         return response()->view('cms.cities.create');
 
     }
@@ -44,7 +51,7 @@ class CityController extends Controller
      */
     public function store(Request $request)
     {
-        // echo "nnnn";
+        $this->authorize('ViewAny', City::class);    
         // dd($request->all);
 
         //لتحقق من البيانات 
@@ -105,6 +112,8 @@ class CityController extends Controller
     public function edit(City $city)
     {
         //
+        $this->authorize('update', $city);    
+
         return response()->view('cms.cities.edit',['city'=>$city]);
     }
 
@@ -118,6 +127,8 @@ class CityController extends Controller
     public function update(Request $request, City $city)
     {
         //
+        $this->authorize('update', $city);    
+
         $request->validate([
             'name_en' =>     'required|String|min:3|max:100',
             'name_ar' => 'required|String|min:3|max:100',
@@ -149,6 +160,7 @@ class CityController extends Controller
     public function destroy(City  $city)
     {
         //
+        $this->authorize('delete', $city);    
 
         // isDeleted = DB::delete('DELETE FROM cities where id = ?', [$id]);
         // isDeleted = DB::table('cities'->delete($id));

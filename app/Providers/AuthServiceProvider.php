@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -14,6 +15,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        // 'App\Models\City' => 'App\Policies\CityPolicy',
+        'Spatie\Permission\Models\Role' => 'App\Policies\RolePolicy',
+
     ];
 
     /**
@@ -26,5 +30,6 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         //
+        // Passport::personalAccessToken(Carbon::now()->addMonthes(3));
     }
 }

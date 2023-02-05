@@ -95,13 +95,14 @@
 
 <script>
   function performLogin(){
-    axios.post('/cms/admin/login',{
+    axios.post('/cms/login',{
     email: document.getElementById('email').value,
     password:document.getElementById('password').value,
     remember:document.getElementById('remember').checked,
   }).then(function(response){
       console.log(response);
       toastr.success(response.data.message);
+      window.location.href = '/cms/admin';
   })
   .catch(function(error){
     console.log(error.response);
